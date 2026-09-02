@@ -1,13 +1,9 @@
 from fastapi import FastAPI
+from auth_routes import auth_router
+from order_routes import order_router
 
 app = FastAPI(title="Projeto FastAPI")
 
+app.include_router(auth_router)
+app.include_router(order_router)
 
-@app.get("/")
-def read_root():
-    return {"status": "ok"}
-
-
-@app.get("/itens/{item_id}")
-def read_item(item_id: int, q: str | None = None):
-    return {"item_id": item_id, "q": q}
