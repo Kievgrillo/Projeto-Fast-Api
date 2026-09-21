@@ -4,7 +4,7 @@ from typing import Optional
 
 class UsuarioSchema (BaseModel):
     nome: str
-    emai: str
+    email: str
     senha: str
     ativo: Optional[bool]
     admin: Optional[bool]
