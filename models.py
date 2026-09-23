@@ -34,7 +34,7 @@ class Pedido(Base):
     status = Column("status", String)
     preco = Column("preco", Float)
 
-    def __init__(self, usuario, status="Pendente", preco=0):
+    def __init__(self, usuario, status="PENDENTE", preco=0):
         self.usuario = usuario
         self.status = status
         self.preco = preco

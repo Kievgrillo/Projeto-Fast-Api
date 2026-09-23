@@ -29,16 +29,49 @@ async def home():
     return {"mensagem": "Você acessou a rota padrao de autenticação", "autenticado": False}
 
 @auth_router.post("/criar_conta")
-async def criar_conta(usuario_schema: UsuarioSchema, session: Session = Depends(pegar_sessao)):  
-    usuario = session.query(Usuario).filter(Usuario.email==usuario_schema.email).first()
+async def criar_conta(usuario_schema: UsuarioSchema, session: Session = Depends(pegar_sessao)):
+    """Cadastro público. Sempre cria conta comum, admin=False fixo — o cliente não decide isso."""
+    usuario = session.query(Usuario).filter(Usuario.email == usuario_schema.email).first()
     if usuario:
         raise HTTPException(status_code=400, detail="Email cadastrado")
-    else:
-        senha_criptografa = bcrypt_context.hash(usuario_schema.senha)
-        novo_usuario = Usuario(usuario_schema.nome, usuario_schema.email, senha_criptografa, usuario_schema.ativo, usuario_schema.admin)
-        session.add(novo_usuario)
-        session.commit()
-        return {"mensagem": f"usario cadastrado com sucesso {usuario_schema.email}"}
+
+    senha_criptografa = bcrypt_context.hash(usuario_schema.senha)
+    novo_usuario = Usuario(
+        usuario_schema.nome,
+        usuario_schema.email,
+        senha_criptografa,
+        usuario_schema.ativo,
+        False,
+    )
+    session.add(novo_usuario)
+    session.commit()
+    return {"mensagem": f"usuario cadastrado com sucesso {usuario_schema.email}"}
+
+@auth_router.post("/criar_conta_admin")
+async def criar_conta_admin(
+    usuario_schema: UsuarioSchema,
+    session: Session = Depends(pegar_sessao),
+    usuario_logado: Usuario = Depends(verificar_token),
+):
+    """Só um admin autenticado pode criar outro admin."""
+    if not usuario_logado.admin:
+        raise HTTPException(status_code=401, detail="Você não tem autorização para criar conta admin")
+
+    usuario = session.query(Usuario).filter(Usuario.email == usuario_schema.email).first()
+    if usuario:
+        raise HTTPException(status_code=400, detail="Email cadastrado")
+
+    senha_criptografa = bcrypt_context.hash(usuario_schema.senha)
+    novo_usuario = Usuario(
+        usuario_schema.nome,
+        usuario_schema.email,
+        senha_criptografa,
+        usuario_schema.ativo,
+        True,
+    )
+    session.add(novo_usuario)
+    session.commit()
+    return {"mensagem": f"admin cadastrado com sucesso {usuario_schema.email}"}
 
 @auth_router.post("/login")
 async def login(login_schema: LoginSchema, session: Session = Depends(pegar_sessao)):
