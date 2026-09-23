@@ -12,8 +12,6 @@ Base = declarative_base()
 class Usuario(Base): 
     __tablename__= "usuarios" 
 
-
-    
     id = Column("id", Integer, primary_key=True, autoincrement=True)
     nome = Column("nome", String)
     email = Column("email", String, nullable=False)
@@ -46,7 +44,7 @@ class ItemPedido(Base):
 
     id = Column ("id", Integer, primary_key=True, autoincrement=True)
     quantidade = Column ("quantidade", Integer) 
-    sabor = Column ("Sabor", String)
+    sabor = Column ("sabor", String)
     tamanho = Column ("tamanho", String)
     preco_unitario = Column ("preco_unitario", Float)
     pedido = Column("pedido", ForeignKey("pedidos.id")) 
